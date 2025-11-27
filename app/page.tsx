@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ChoroplethMap from "@/components/ChoroplethMap";
 
 type MoodDoc = {
   _id?: string;
@@ -74,7 +75,7 @@ export default function HomePage() {
   const badPct = grandTotal ? 100 - goodPct : 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-start justify-center py-16 px-4">
+    <div className="min-h-screen bg-slate-800 text-white flex items-start justify-center py-16 px-4">
       <div className="w-full max-w-2xl">
         <header className="mb-8">
           <h1 className="text-4xl font-extrabold tracking-tight">How's the world feeling today?</h1>
@@ -82,7 +83,7 @@ export default function HomePage() {
         </header>
 
         {/* Poll Card */}
-        <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <section className="bg-slate-800 border border-slate-600 rounded-2xl p-6">
           {/* Before vote: show buttons. After vote: show results */}
           {!lastVote ? (
             <div className="space-y-4">
@@ -162,7 +163,7 @@ export default function HomePage() {
               {/* optionally show country breakdown preview */}
               <div>
                 <h4 className="text-sm text-slate-400 mb-2">Top countries (by total votes)</h4>
-                <div className="flex flex-col gap-2">
+                {/* <div className="flex flex-col gap-2">
                   {stats.slice(0, 5).map((c) => {
                     const t = (c.good || 0) + (c.bad || 0);
                     return (
@@ -173,10 +174,12 @@ export default function HomePage() {
                     );
                   })}
                   {stats.length === 0 && <div className="text-slate-500">No country data yet.</div>}
-                </div>
+                </div> */}
+
               </div>
             </div>
           )}
+          <ChoroplethMap />
         </section>
       </div>
     </div>
