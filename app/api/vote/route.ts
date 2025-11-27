@@ -9,14 +9,14 @@ export async function POST(req: Request) {
 
     // body (we accept mood only from client)
     const { mood } = await req.json();
-console.log(mood)
+    console.log(mood)
     if (!mood || !["good", "bad"].includes(mood)) {
       return NextResponse.json({ success: false, error: "Invalid mood" }, { status: 400 });
     }
 
     // middleware sets this
     const country = req.headers.get("x-country-code");
-
+    console.log(country);
     if (!country) {
       return NextResponse.json({ success: false, error: "Country missing" }, { status: 400 });
     }
