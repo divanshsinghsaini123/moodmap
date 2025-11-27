@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
     // body (we accept mood only from client)
     const { mood } = await req.json();
-
+console.log(mood)
     if (!mood || !["good", "bad"].includes(mood)) {
       return NextResponse.json({ success: false, error: "Invalid mood" }, { status: 400 });
     }
