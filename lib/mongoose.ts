@@ -19,11 +19,11 @@ interface MongooseConnection {
   promise: Promise<typeof mongoose> | null;
 }
 
-// @ts-ignore
+// @ts-expect-error
 let cached: MongooseConnection = global.mongoose;
 
 if (!cached) {
-  // @ts-ignore
+ // @ts-expect-error
   cached = global.mongoose = { conn: null, promise: null };
 }
 

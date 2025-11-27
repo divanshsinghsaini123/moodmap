@@ -34,8 +34,8 @@ export default function ChoroplethMap() {
         if (data.success) {
           // convert to map by ISO2 (uppercased)
           const map: Record<string, Stat> = {};
-          (data.stats || []).forEach((s: any) => {
-            if (s.country) map[(s.country as string).toUpperCase()] = s;
+          (data.stats || []).forEach((s: Stat) => {
+            if (s.country) map[s.country.toUpperCase()] = s;
           });
           setStats(map);
         }
@@ -87,8 +87,8 @@ export default function ChoroplethMap() {
                   geography={geo}
                   fill={fill}
                   stroke="#020617"
-                  onMouseEnter={() => {
-                    // optionally show tooltip via state (not implemented here)
+                  onMouseEnter={(evt: React.MouseEvent<SVGPathElement, MouseEvent>) => {
+  // ...
                   }}
                   style={{
                     hover: { fill: "#ffd166", transition: "all 150ms" },

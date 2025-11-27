@@ -78,7 +78,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-slate-800 text-white flex items-start justify-center py-16 px-4">
       <div className="w-full max-w-2xl">
         <header className="mb-8">
-          <h1 className="text-4xl font-extrabold tracking-tight">How's the world feeling today?</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight">How&apos;s your day going?</h1>
           <p className="text-slate-400 mt-2">Tap an option to share — results show instantly.</p>
         </header>
 
@@ -103,7 +103,7 @@ export default function HomePage() {
                   className="group relative rounded-xl p-6 bg-gradient-to-tr from-rose-600/80 to-rose-500/70 hover:scale-[1.01] transform transition duration-150 focus:outline-none"
                 >
                   <div className="text-lg font-semibold">Have a Bad Day</div>
-                  <div className="text-sm text-rose-100/80 mt-1">Be honest — it's okay</div>
+                  <div className="text-sm text-rose-100/80 mt-1">Be honest — It&apos;s okay</div>
                 </button>
               </div>
 
