@@ -15,17 +15,20 @@ interface MongooseConnection {
   promise: Promise<Mongoose> | null;
 }
 
-/** Extend NodeJS.Global so TS knows about _mongoose */
+/**
+ * Augment globalThis so TypeScript knows about _mongoose.
+ * Using `GlobalThis` avoids `namespace` usage and the `no-namespace` lint rule.
+ */
 declare global {
-  namespace NodeJS {
-    interface Global {
-      _mongoose?: MongooseConnection;
-    }
+  interface GlobalThis {
+    _mongoose?: MongooseConnection;
   }
 }
 
-// cast `global` to the extended NodeJS.Global type
-const globalForMongoose = global as unknown as NodeJS.Global;
+// use typed globalThis alias
+const globalForMongoose = globalThis as typeof globalThis & {
+  _mongoose?: MongooseConnection;
+};
 
 let cached = globalForMongoose._mongoose;
 

@@ -14,7 +14,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<MoodDoc[]>([]);
   const [lastVote, setLastVote] = useState<"good" | "bad" | null>(null);
-  const [totalAll, setTotalAll] = useState(0);
+  
 
   useEffect(() => {
     loadStats();
@@ -27,7 +27,7 @@ export default function HomePage() {
       if (data.success) {
         setStats(data.stats as MoodDoc[]);
         const total = (data.stats as MoodDoc[]).reduce((s, d) => s + (d.good || 0) + (d.bad || 0), 0);
-        setTotalAll(total);
+        
       }
     } catch (err) {
       console.error("loadStats:", err);
