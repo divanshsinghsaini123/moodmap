@@ -1,47 +1,52 @@
 // src/lib/mongoose.ts
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI as string;
 
-
 if (!MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+  throw new Error(
+    "Please define the MONGODB_URI environment variable inside .env.local"
+  );
 }
 
-/**
- * In Next.js (especially with hot reload), we must avoid
- * creating multiple Mongoose connections.
- * So we store the connection in a global variable.
- */
-
+/** Single typed connection cache shared across hot reloads */
 interface MongooseConnection {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
+  conn: Mongoose | null;
+  promise: Promise<Mongoose> | null;
 }
 
-// @ts-expect-error
-let cached: MongooseConnection = global.mongoose;
+/** Extend NodeJS.Global so TS knows about _mongoose */
+declare global {
+  namespace NodeJS {
+    interface Global {
+      _mongoose?: MongooseConnection;
+    }
+  }
+}
+
+// cast `global` to the extended NodeJS.Global type
+const globalForMongoose = global as unknown as NodeJS.Global;
+
+let cached = globalForMongoose._mongoose;
 
 if (!cached) {
- // @ts-expect-error
-  cached = global.mongoose = { conn: null, promise: null };
-  
+  cached = { conn: null, promise: null };
+  globalForMongoose._mongoose = cached;
 }
 
-export async function connectToDatabase() {
-  if (cached.conn) {
-    return cached.conn;
+export async function connectToDatabase(): Promise<Mongoose> {
+  if (cached!.conn) {
+    return cached!.conn;
   }
 
-  if (!cached.promise) {
-    cached.promise = mongoose
+  if (!cached!.promise) {
+    cached!.promise = mongoose
       .connect(MONGODB_URI, {
-        // options if needed
         dbName: process.env.MONGODB_DB,
       })
-      .then((mongooseInstance) => mongooseInstance);
+      .then((m) => m);
   }
 
-  cached.conn = await cached.promise;
-  return cached.conn;
+  cached!.conn = await cached!.promise;
+  return cached!.conn;
 }
