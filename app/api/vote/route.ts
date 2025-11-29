@@ -75,7 +75,18 @@ export async function POST(req: Request) {
     // 1. DigitalOcean Geo header
     // 2. If no country, fallback to "UN"
     console.log(countryHeader);
-    const country = countryHeader?.toUpperCase() || "UN";
+    const country =
+  // DigitalOcean App Platform
+  req.headers.get("x-geo-country")?.toUpperCase()
+  // Vercel
+  || req.headers.get("x-vercel-ip-country")?.toUpperCase()
+  // Cloudflare (if you ever use it)
+  || req.headers.get("cf-ipcountry")?.toUpperCase()
+  // fallback to first forwarded IP (you'd only use this if you plan to call an IP->geo API)
+  || (req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "")
+  // finally, server-side fallback
+  || process.env.DEFAULT_COUNTRY?.toUpperCase()
+  || "UN";
 
     console.log("Detected Country:", country, "IP:", ip);
 
