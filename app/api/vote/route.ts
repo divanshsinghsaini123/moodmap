@@ -2,23 +2,38 @@
 import { NextResponse } from "next/server";
 import Mood from "@/models/mood";
 import { connectToDatabase } from "@/lib/mongoose";
-export const runtime = 'edge';
+import * as geoip from "geoip-lite"
+
+
+function getClientIpFromReq(reqHeaders: Headers) {
+  // x-forwarded-for may contain a comma-separated list; take first non-empty
+  const xff = reqHeaders.get("x-forwarded-for") || reqHeaders.get("x-real-ip") || "";
+  if (!xff) return "";
+  return xff.split(",")[0].trim();
+}
+
 export async function POST(req: Request) {
   try {
     await connectToDatabase();
 
     // body (we accept mood only from client)
     const { mood } = await req.json();
-console.log(mood)
+
     if (!mood || !["good", "bad"].includes(mood)) {
       return NextResponse.json({ success: false, error: "Invalid mood" }, { status: 400 });
     }
 
-    // middleware sets this
-    const country = req.headers.get("x-country-code");
+    const ip = getClientIpFromReq((req as any).headers ?? new Headers());
+    let country = "IN" ;
 
-    if (!country) {
-      return NextResponse.json({ success: false, error: "Country missing" }, { status: 400 });
+    if (ip) {
+      const geo = geoip.lookup(ip);
+      if (geo && geo.country) country = geo.country.toUpperCase();
+      console.log("the coutry code -------------------------------------------------")
+      console.log(country);
+    } else {
+      // optional: set a test fallback for local dev
+      country = "IN";
     }
 
     // update

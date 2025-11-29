@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ChoroplethMap from "@/components/ChoroplethMap";
-export const runtime = "edge";
+
 type MoodDoc = {
   _id?: string;
   country: string;

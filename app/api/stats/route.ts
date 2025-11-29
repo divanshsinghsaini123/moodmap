@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import Mood from "@/models/mood";
 import { connectToDatabase } from "@/lib/mongoose";
-export const runtime = 'edge';
+
 export async function GET() {
   try {
     await connectToDatabase();
