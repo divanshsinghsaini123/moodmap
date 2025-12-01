@@ -43,6 +43,7 @@
 // }
 
 // app/api/vote/route.ts
+// app/api/vote/route.ts
 import { NextResponse } from "next/server";
 import Mood from "@/models/mood";
 import { connectToDatabase } from "@/lib/mongoose";
@@ -51,50 +52,31 @@ export async function POST(req: Request) {
   try {
     await connectToDatabase();
 
-    // read request body
-    const { mood } = await req.json().catch(() => ({}));
+    // parse body safely
+    const body = await req.json().catch(() => ({} as Record<string, unknown>));
+    const mood = String((body as { mood?: unknown }).mood ?? "").toLowerCase();
 
     if (!mood || !["good", "bad"].includes(mood)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid mood" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "Invalid mood" }, { status: 400 });
     }
 
-    // ---------- COUNTRY DETECTION ----------
-    // DigitalOcean App Platform adds: x-geo-country
-    const countryHeader = req.headers.get("x-geo-country");
+    // prefer platform geo headers, then common cloud headers, then fallback env
+    const headers = req.headers;
+    const countryHeader =
+      headers.get("x-geo-country")?.toUpperCase() || // DigitalOcean App Platform
+      headers.get("x-vercel-ip-country")?.toUpperCase() || // Vercel
+      headers.get("cf-ipcountry")?.toUpperCase(); // Cloudflare
 
-    // fallback to forwarded IP
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "";
+    // fallback to first forwarded IP (for logging/optional external lookup)
+    const forwardedIp = headers.get("x-forwarded-for")?.split(",")[0].trim() || headers.get("x-real-ip") || "";
 
-    // Final country logic:
-    // 1. DigitalOcean Geo header
-    // 2. If no country, fallback to "UN"
-    console.log(countryHeader);
-    const country =
-  // DigitalOcean App Platform
-  req.headers.get("x-geo-country")?.toUpperCase()
-  // Vercel
-  || req.headers.get("x-vercel-ip-country")?.toUpperCase()
-  // Cloudflare (if you ever use it)
-  || req.headers.get("cf-ipcountry")?.toUpperCase()
-  // fallback to first forwarded IP (you'd only use this if you plan to call an IP->geo API)
-  || (req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "")
-  // finally, server-side fallback
-  || process.env.DEFAULT_COUNTRY?.toUpperCase()
-  || "UN";
+    // final country decision: prefer platform header, else DEFAULT_COUNTRY env, else UN
+    const country = countryHeader ?? process.env.DEFAULT_COUNTRY?.toUpperCase() ?? "UN";
 
-    console.log("Detected Country:", country, "IP:", ip);
+    // debug log (safe)
+    console.log("Detected Country:", country, "Forwarded IP:", forwardedIp);
 
-    // ---------- UPDATE DATABASE ----------
-    const update =
-      mood === "good"
-        ? { $inc: { good: 1 } }
-        : { $inc: { bad: 1 } };
+    const update = mood === "good" ? { $inc: { good: 1 } } : { $inc: { bad: 1 } };
 
     await Mood.updateOne({ country }, update, { upsert: true });
 
@@ -103,9 +85,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, country: doc });
   } catch (err) {
     console.error("Error in /api/vote:", err);
-    return NextResponse.json(
-      { success: false, error: "Internal error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Internal error" }, { status: 500 });
   }
 }
