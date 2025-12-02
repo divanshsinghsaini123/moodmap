@@ -332,6 +332,7 @@ const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 
 /** color interpolation between red (bad) and green (good) */
 function colorForRatio(ratio: number) {
+    if (ratio == 0 ) return "#E5E7EB"; // neutral yellow
   const t = (ratio + 1) / 2; // 0..1
   const r = Math.round(239 * (1 - t)); // red  -> 239
   const g = Math.round(68 + 187 * t); // 68→255
@@ -389,7 +390,7 @@ export default function ChoroplethMap({stats} : { stats: Stat[] }) {
         </div>
       )}
 
-      <ComposableMap projectionConfig={{ scale: 220 }} width={1400} height={700} style={{ width: "100%", height: "auto" }}>
+      <ComposableMap projectionConfig={{ scale: 265 }} width={1300} height={700} style={{ width: "100%", height: "auto" }}>
         <Geographies geography={GEO_URL}>
           {({ geographies }) =>
             geographies.map((g) => {
