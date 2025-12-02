@@ -319,7 +319,7 @@ export default function HomePage() {
     setReaction(message);
 
     setAnimateMsg(true);
-    setTimeout(() => setAnimateMsg(false), 1200);
+    setTimeout(() => setAnimateMsg(false), 4000);
   }
 
   useEffect(() => {
