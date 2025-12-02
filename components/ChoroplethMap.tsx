@@ -313,7 +313,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
-import countryMap from "@/data/country-map.json"; // generated file -> { "834": { "iso2":"TZ","name":"Tanzania" }, ... }
+import countryMap from "@/lib/country-map.json"; // generated file -> { "834": { "iso2":"TZ","name":"Tanzania" }, ... }
 
 type Stat = { country: string; good: number; bad: number };
 
