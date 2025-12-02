@@ -614,7 +614,7 @@ export default function HomePage() {
               )}
             </div>
 
-            <ChoroplethMap />
+            <ChoroplethMap stats={stats}/>
           </section>
         </main>
       </div>

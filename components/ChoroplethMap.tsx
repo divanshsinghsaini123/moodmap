@@ -314,6 +314,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import countryMap from "@/lib/country-map.json"; // generated file -> { "834": { "iso2":"TZ","name":"Tanzania" }, ... }
+import { STATES } from "mongoose";
 
 type Stat = { country: string; good: number; bad: number };
 
@@ -338,31 +339,27 @@ function colorForRatio(ratio: number) {
   return `rgb(${r},${g},${b})`;
 }
 
-export default function ChoroplethMap() {
+export default function ChoroplethMap({stats} : { stats: Stat[] }) {
   const [loading, setLoading] = useState(true);
   const [statsArr, setStatsArr] = useState<Stat[]>([]);
   const [tooltip, setTooltip] = useState<Tooltip>(null);
 
   useEffect(() => {
     let mounted = true;
-    async function load() {
+    
       try {
-        const res = await fetch("/api/stats");
-        const data = await res.json();
-        if (mounted && data?.success) {
-          setStatsArr(data.stats || []);
+        if (mounted) {
+          setStatsArr(stats || []);
         }
       } catch (err) {
         console.error("Error loading stats:", err);
       } finally {
         if (mounted) setLoading(false);
       }
-    }
-    load();
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [stats]);
 
   // build iso -> stat map once (O(n) on updates)
   const statsByIso = useMemo(() => {
