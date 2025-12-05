@@ -12,7 +12,14 @@ export async function GET() {
     // sort by total votes (good + bad) descending
     docs.sort((a, b) => (b.good + b.bad) - (a.good + a.bad));
 
-    return NextResponse.json({ success: true, stats: docs });
+    // return NextResponse.json({ success: true, stats: docs });
+    return new NextResponse(JSON.stringify({ success: true, stats : docs }), {
+    headers: {
+      "Content-Type": "application/json",
+      // 🔥 CACHE HERE (10 seconds)
+      "Cache-Control": "public, max-age=10, stale-while-revalidate=59",
+    },
+  });
   } catch (err) {
     console.error("Error in /api/stats:", err);
     return NextResponse.json({ success: false, error: "internal" }, { status: 500 });

@@ -6,8 +6,8 @@ export interface IMood extends Document {
   bad: number;
 }
 
-const MoodSchema: Schema = new Schema<IMood>({
-  country: { type: String, required: true, unique: true },
+const MoodSchema = new Schema<IMood>({
+  country: { type: String, required: true, unique: true, index: true },
   good: { type: Number, default: 0 },
   bad: { type: Number, default: 0 },
 });
