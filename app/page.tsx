@@ -3,7 +3,12 @@
 
 import { useEffect, useState } from "react";
 import ChoroplethMap from "@/components/ChoroplethMap";
+import { io, Socket } from "socket.io-client";
+import countryMap from "@/lib/countyname-code.json"; 
+import LiveVoteToast from '@/components/LiveVoteToast';
 
+const SERVER_URL =  process.env.SOCKET_SERVER_URL || "http://localhost:4000";
+const socket = io(SERVER_URL) ;
 
 type MoodDoc = {
   _id?: string;
@@ -90,7 +95,29 @@ export default function HomePage() {
         body: JSON.stringify({ mood }),
       });
 
-      await res.json();
+      let data = await res.json();
+      let countryCode = data.country.country;
+      if (data.success && countryCode) {
+        // Use the code directly or a friendly name if needed
+        const countryDisplay = countryCode === "UN" ? "an unknown location" : countryCode;
+        const coutryname = (countryMap as Record<string, string>)[countryDisplay];
+        if(coutryname){
+          console.log(coutryname , countryCode) ;
+        }
+        else{
+          console.log("country hi nhi milil") ;
+        }
+        // 4. Construct the required toast string
+        const toastString = `Someone from ${countryDisplay} is feeling ${mood} today`;
+        
+        // 5. Emit the string via Socket.IO
+        socket.emit("VoteMessage", toastString);
+        
+        console.log("Emitting toast:", toastString);
+      } else {
+        console.error("API response missing success or country code:", data);
+      }
+
       await loadStats();
     } catch (err) {
       console.error("vote error:", err);
@@ -107,6 +134,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white overflow-x-hidden">
+      <LiveVoteToast />
       {/* subtle responsive glow blobs */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-32 -left-10 sm:left-10 h-48 sm:h-72 w-48 sm:w-72 rounded-full bg-cyan-500/25 blur-3xl" />
