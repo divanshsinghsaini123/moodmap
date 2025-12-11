@@ -3,7 +3,7 @@
 import { io, Socket } from "socket.io-client";
 
 // Ensure this URL matches your Node.js server
-const SERVER_URL = process.env.SOCKET_SERVER_URL || "http://localhost:3000";
+const SERVER_URL = "https://moodmap-socket-server.onrender.com"
 
 // Export the singleton socket instance
 export const socket: Socket = io(SERVER_URL);

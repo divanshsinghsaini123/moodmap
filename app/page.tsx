@@ -7,7 +7,7 @@ import { io, Socket } from "socket.io-client";
 import countryMap from "@/lib/countyname-code.json"; 
 import LiveVoteToast from '@/components/LiveVoteToast';
 
-const SERVER_URL =  process.env.SOCKET_SERVER_URL || "http://localhost:4000";
+const SERVER_URL =  "https://moodmap-socket-server.onrender.com"
 const socket = io(SERVER_URL) ;
 
 type MoodDoc = {
