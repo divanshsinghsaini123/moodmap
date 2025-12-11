@@ -101,6 +101,7 @@ export default function HomePage() {
         // Use the code directly or a friendly name if needed
         const countryDisplay = countryCode === "UN" ? "an unknown location" : countryCode;
         const coutryname = (countryMap as Record<string, string>)[countryDisplay];
+        
         if(coutryname){
           console.log(coutryname , countryCode) ;
         }
@@ -108,7 +109,7 @@ export default function HomePage() {
           console.log("country hi nhi milil") ;
         }
         // 4. Construct the required toast string
-        const toastString = `Someone from ${countryDisplay} is feeling ${mood} today`;
+        const toastString = `Someone from ${coutryname} is feeling ${mood} today`;
         
         // 5. Emit the string via Socket.IO
         socket.emit("VoteMessage", toastString);
