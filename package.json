@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "animejs": "^3.2.2",
     "framer-motion": "^12.23.26",
     "geoip-lite": "^1.4.10",
     "mongoose": "^9.0.0",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/animejs": "^3.1.13",
     "@types/geoip-lite": "^1.4.4",
     "@types/node": "^20",
     "@types/react": "^19",
