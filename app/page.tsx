@@ -38,28 +38,6 @@ export default function HomePage() {
 
   // Animation Initialization
   useEffect(() => {
-    // 1. Header Elements Staggered Entry
-    if (headerRef.current) {
-      const timeline = anime.timeline({
-        easing: 'easeOutExpo',
-      });
-
-      timeline
-        .add({
-          targets: headerRef.current.querySelectorAll('.stagger-text'),
-          translateY: ['100%', '0%'],
-          duration: 1200,
-          delay: anime.stagger(100),
-        })
-        .add({
-          targets: headerRef.current.querySelectorAll('.header-item'),
-          translateY: [20, 0],
-          opacity: [0, 1],
-          duration: 800,
-          delay: anime.stagger(200),
-        }, '-=800'); // Overlap with text reveal
-    }
-
     // 2. Background Blobs Floating Effect (Randomized)
     const animateBlob = (el: HTMLElement | null) => {
       if (!el) return;
@@ -296,35 +274,39 @@ export default function HomePage() {
       <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 flex flex-col gap-10">
         {/* Top: Title */}
         <header className="text-center" ref={headerRef}>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/70 border border-cyan-400/40 text-[11px] text-cyan-100 mb-4 opacity-0 header-item">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/70 border border-cyan-400/40 text-[11px] text-cyan-100 mb-4"
+          >
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             Live • MoodMap
-          </div>
+          </motion.div>
           {/* Colorblind mode removed */}
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight overflow-hidden">
-            <span className="inline-block overflow-hidden align-bottom">
-              <span className="stagger-text inline-block transform-gpu">Read</span>
-            </span>{" "}
-            <span className="inline-block overflow-hidden align-bottom">
-              <span className="stagger-text inline-block transform-gpu">the</span>
-            </span>{" "}
-            <span className="text-cyan-400 inline-block overflow-hidden align-bottom">
-              <span className="stagger-text inline-block transform-gpu">mood</span>
-            </span>{" "}
-            <span className="inline-block overflow-hidden align-bottom">
-              <span className="stagger-text inline-block transform-gpu">of</span>
-            </span>{" "}
-            <span className="inline-block overflow-hidden align-bottom">
-              <span className="stagger-text inline-block transform-gpu">the</span>
-            </span>{" "}
-            <span className="inline-block overflow-hidden align-bottom">
-              <span className="stagger-text inline-block transform-gpu">planet</span>
-            </span>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 flex flex-wrap justify-center gap-x-2 sm:gap-x-3 gap-y-1">
+            {["Read", "the", "mood", "of", "the", "planet"].map((word, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, y: 20, filter: "blur(12px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 1.0, delay: 0.1 + i * 0.1, ease: "easeOut" }}
+                className={word === "mood" ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-emerald-400 to-cyan-300 animate-gradient-x" : ""}
+                style={{ display: "inline-block" }}
+              >
+                {word}
+              </motion.span>
+            ))}
           </h1>
-          <p className="hidden sm:block mt-3 text-slate-300 max-w-xl mx-auto text-sm sm:text-base opacity-0 header-item">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.0, delay: 0.6 }}
+            className="hidden sm:block mt-3 text-slate-300 max-w-xl mx-auto text-sm sm:text-base"
+          >
             Cast your vote and watch the world glow between good days and bad days.
             Every click shifts the colors.
-          </p>
+          </motion.p>
         </header>
 
         {/* Main Layout: 2 columns on large screens */}
