@@ -267,7 +267,7 @@ export default function HomePage() {
       <div
         className="pointer-events-none fixed inset-0 z-50 transition-opacity duration-300 mix-blend-screen"
         style={{
-          background: `radial-gradient(400px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(248, 158, 56, 0.29), transparent 5%)`
+          // background: `radial-gradient(800px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(248, 158, 56, 0.29), transparent 5%)`
         }}
       />
 
@@ -284,15 +284,14 @@ export default function HomePage() {
             Live • MoodMap
           </motion.div>
           {/* Colorblind mode removed */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 flex flex-wrap justify-center gap-x-2 sm:gap-x-3 gap-y-1">
+          <h1 className="text-2xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-2 text-center">
             {["Read", "the", "mood", "of", "the", "planet"].map((word, i) => (
               <motion.span
                 key={i}
                 initial={{ opacity: 0, y: 20, filter: "blur(12px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 1.0, delay: 0.1 + i * 0.1, ease: "easeOut" }}
-                className={word === "mood" ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-emerald-400 to-cyan-300 animate-gradient-x" : ""}
-                style={{ display: "inline-block" }}
+                className={`inline-block mr-2 sm:mr-3 last:mr-0 ${word === "mood" ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-emerald-400 to-cyan-300 animate-gradient-x" : ""}`}
               >
                 {word}
               </motion.span>
