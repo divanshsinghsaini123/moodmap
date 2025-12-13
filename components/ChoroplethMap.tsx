@@ -314,7 +314,7 @@ function colorForRatio(ratio: number) {
   }
 }
 
-export default function ChoroplethMap({ stats }: { stats: Stat[] }) {
+export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], activeVote?: { country: string, mood: "good" | "bad" } | null }) {
   const [loading, setLoading] = useState(true);
   const [statsArr, setStatsArr] = useState<Stat[]>([]);
   const [tooltip, setTooltip] = useState<Tooltip>(null);
@@ -444,6 +444,13 @@ export default function ChoroplethMap({ stats }: { stats: Stat[] }) {
                 fill = colorForRatio(ratio);
               }
 
+              // Check for active vote glow
+              const isActive = activeVote && iso && activeVote.country === iso;
+              if (isActive) {
+                // Flash effect color
+                fill = activeVote.mood === "good" ? "#ffffff" : "#ffffff"; // Flash white for impact
+              }
+
               return (
                 <Geography
                   key={geo.rsmKey}
@@ -459,7 +466,15 @@ export default function ChoroplethMap({ stats }: { stats: Stat[] }) {
 
                   // STYLING: Transitions and Hover Glow
                   style={{
-                    default: { outline: "none", transition: "fill 0.5s ease" },
+                    default: isActive ? {
+                      outline: "none",
+                      animation: activeVote.mood === "good"
+                        ? "map-flash-good 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+                        : "map-flash-bad 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                      transformBox: "fill-box",
+                      transformOrigin: "center",
+                      zIndex: 100
+                    } : { outline: "none", transition: "fill 0.5s ease" },
                     hover: {
                       fill: "#ffffff",
                       stroke: "#ffffff",

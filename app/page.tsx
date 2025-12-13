@@ -26,6 +26,8 @@ export default function HomePage() {
   const [reaction, setReaction] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [toastVoteType, setToastVoteType] = useState<"good" | "bad" | null>(null);
+  const [celebrating, setCelebrating] = useState(false);
+  const [activeVote, setActiveVote] = useState<{ country: string, mood: "good" | "bad" } | null>(null);
 
   // Refs for animations
   const headerRef = useRef<HTMLElement>(null);
@@ -163,6 +165,13 @@ export default function HomePage() {
       setLoading(true);
       setLastVote(mood);
       triggerReaction(mood);
+
+      // Trigger celebration for good votes
+      // if (mood === "good") {
+      //   setCelebrating(true);
+      //   setTimeout(() => setCelebrating(false), 2000);
+      // }
+
       const res = await fetch("/api/vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -182,6 +191,20 @@ export default function HomePage() {
         else {
           console.log("country hi nhi milil");
         }
+        if (mood === "good") {
+          // 1. Start Celebration
+          setCelebrating(true);
+
+          // 2. PAUSE HERE for 2 seconds
+          await new Promise(resolve => setTimeout(resolve, 2000));
+
+          // 3. Stop Celebration
+          setCelebrating(false);
+        }
+        // Trigger map flash effect
+        setActiveVote({ country: countryCode, mood });
+        setTimeout(() => setActiveVote(null), 3000);
+
         // 4. Construct the required toast string
         const toastString = `Someone from ${coutryname} is feeling ${mood} today`;
 
@@ -202,6 +225,16 @@ export default function HomePage() {
     }
   }
 
+  // Global Mouse Tracking for Spotlight
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      document.body.style.setProperty("--cursor-x", `${e.clientX}px`);
+      document.body.style.setProperty("--cursor-y", `${e.clientY}px`);
+    };
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
+  }, []);
+
   const { good, bad } = totals();
   const grandTotal = good + bad || 0;
   const goodPct = grandTotal ? Math.round((good / grandTotal) * 100) : 0;
@@ -211,6 +244,39 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white overflow-x-hidden">
       <LiveVoteToast />
 
+      {/* Celebration Overlay */}
+      <AnimatePresence>
+        {celebrating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none"
+          >
+            {/* Backdrop Blur */}
+            <div className="absolute inset-0 bg-emerald-500/10 backdrop-blur-[2px]" />
+
+            {/* Main Content */}
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 1.5, opacity: 0, y: -50 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="relative z-10 flex flex-col items-center text-center p-8"
+            >
+              <div className="text-8xl mb-2 filter drop-shadow-[0_0_40px_rgba(52,211,153,0.8)] animate-bounce">
+                🌟
+              </div>
+              <h2 className="text-5xl sm:text-7xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-green-100 to-teal-200 drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)]">
+                GOOD VIBES
+                <br />
+                SENT!
+              </h2>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
 
       {/* subtle responsive glow blobs */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -219,7 +285,15 @@ export default function HomePage() {
         <div ref={blob3Ref} className="absolute bottom-0 left-1/4 sm:left-1/3 h-32 sm:h-48 w-56 sm:w-72 rounded-full bg-sky-500/10 blur-3xl" />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-10">
+      {/* GLOBAL SPOTLIGHT (Orange/Amber) */}
+      <div
+        className="pointer-events-none fixed inset-0 z-50 transition-opacity duration-300 mix-blend-screen"
+        style={{
+          background: `radial-gradient(400px circle at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(248, 158, 56, 0.29), transparent 5%)`
+        }}
+      />
+
+      <div className="max-w-6xl mx-auto px-4 py-4 sm:py-8 flex flex-col gap-10">
         {/* Top: Title */}
         <header className="text-center" ref={headerRef}>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/70 border border-cyan-400/40 text-[11px] text-cyan-100 mb-4 opacity-0 header-item">
@@ -247,7 +321,7 @@ export default function HomePage() {
               <span className="stagger-text inline-block transform-gpu">planet</span>
             </span>
           </h1>
-          <p className="mt-3 text-slate-300 max-w-xl mx-auto text-sm sm:text-base opacity-0 header-item">
+          <p className="hidden sm:block mt-3 text-slate-300 max-w-xl mx-auto text-sm sm:text-base opacity-0 header-item">
             Cast your vote and watch the world glow between good days and bad days.
             Every click shifts the colors.
           </p>
@@ -276,7 +350,7 @@ export default function HomePage() {
             >
               {/* Spotlight for First Box */}
               <div className="absolute inset-0 -z-10 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700"
-                style={{ background: `radial-gradient(1000px circle at var(--x) var(--y), rgba(148, 163, 184, 0.1), transparent 40%)` }}
+                style={{ background: `radial-gradient(800px circle at var(--x) var(--y), rgba(248, 139, 56, 0.2), transparent 30%)` }}
               />
 
               {!lastVote ? (
@@ -307,28 +381,32 @@ export default function HomePage() {
                       onClick={() => sendVote("good")}
                       onMouseMove={handleMouseMove}
                       disabled={loading}
-                      className="group relative rounded-2xl px-4 py-3.5 bg-gradient-to-br from-emerald-500/80 to-slate-900/90 border border-emerald-500/60
-                               text-left hover:border-emerald-400 transition-colors duration-300
-                               focus:ring-2 focus:ring-emerald-400 focus:outline-none disabled:opacity-70 overflow-hidden isolate"
+                      className="group relative rounded-2xl p-[3px] focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:opacity-70 overflow-hidden isolate"
                     >
-                      {/* Fog Effect (Emerald Hover) */}
-                      <div className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
-                        style={{ background: `radial-gradient(circle at var(--x) var(--y), rgba(16, 185, 129, 0.6), transparent 70%)` }}
-                      />
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <div className="text-base sm:text-lg font-semibold flex items-center gap-2 text-slate-100">
-                            😊 Good day
-                            <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/10 border border-emerald-400/20 text-emerald-200">
-                              Positive
-                            </span>
+                      {/* Running Border Spinner */}
+                      <div className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#6ee7b7_50%,#0000_100%)]" />
+
+                      {/* Inner Button Content */}
+                      <div className="relative h-full w-full rounded-2xl bg-slate-900 px-4 py-3.5 bg-gradient-to-br from-emerald-400/80 to-slate-900/90">
+                        {/* Fog Effect (Emerald Hover) */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
+                          style={{ background: `radial-gradient(circle at var(--x) var(--y), rgba(16, 185, 129, 0.6), transparent 70%)` }}
+                        />
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-base sm:text-lg font-semibold flex items-center gap-2 text-slate-100">
+                              😊 Good day
+                              <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/10 border border-emerald-400/20 text-emerald-200">
+                                Positive
+                              </span>
+                            </div>
+                            <div className="text-xs sm:text-sm text-slate-400 group-hover:text-emerald-100/80 transition-colors mt-1">
+                              Chill, productive or just quietly happy.
+                            </div>
                           </div>
-                          <div className="text-xs sm:text-sm text-slate-400 group-hover:text-yellow-100/80 transition-colors mt-1">
-                            Chill, productive or just quietly happy.
+                          <div className="hidden sm:block text-emerald-50/80 text-xs text-right">
+                            Tap to nudge the map<br />towards green.
                           </div>
-                        </div>
-                        <div className="hidden sm:block text-emerald-50/80 text-xs text-right">
-                          Tap to nudge the map<br />towards green.
                         </div>
                       </div>
                     </button>
@@ -337,28 +415,32 @@ export default function HomePage() {
                       onClick={() => sendVote("bad")}
                       onMouseMove={handleMouseMove}
                       disabled={loading}
-                      className="group relative rounded-2xl px-4 py-3.5 bg-gradient-to-br from-rose-500/80 to-slate-900/90 border border-rose-500/60
-                               text-left hover:border-rose-400 transition-colors duration-300
-                               focus:ring-2 focus:ring-rose-400 focus:outline-none disabled:opacity-70 overflow-hidden isolate"
+                      className="group relative rounded-2xl p-[3px] focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-70 overflow-hidden isolate"
                     >
-                      {/* Fog Effect (Orange Hover) */}
-                      <div className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
-                        style={{ background: `radial-gradient(circle at var(--x) var(--y), rgba(249, 115, 22, 0.6), transparent 70%)` }}
-                      />
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <div className="text-base sm:text-lg font-semibold flex items-center gap-2 text-slate-100">
-                            😞 Bad day
-                            <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-200">
-                              It&apos;s okay
-                            </span>
+                      {/* Running Border Spinner */}
+                      <div className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#dc2626_50%,#0000_100%)]" />
+
+                      {/* Inner Button Content */}
+                      <div className="relative h-full w-full rounded-2xl bg-slate-900 px-4 py-3.5 bg-gradient-to-br from-red-700/80 to-slate-900/90">
+                        {/* Fog Effect (Orange Hover) */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
+                          style={{ background: `radial-gradient(circle at var(--x) var(--y), rgba(249, 115, 22, 0.6), transparent 70%)` }}
+                        />
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-base sm:text-lg font-semibold flex items-center gap-2 text-slate-100">
+                              😞 Bad day
+                              <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-200">
+                                It&apos;s okay
+                              </span>
+                            </div>
+                            <div className="text-xs sm:text-sm text-slate-400 group-hover:text-rose-100/80 transition-colors mt-1">
+                              Overwhelmed, tired or just not feeling it.
+                            </div>
                           </div>
-                          <div className="text-xs sm:text-sm text-slate-400 group-hover:text-rose-100/80 transition-colors mt-1">
-                            Overwhelmed, tired or just not feeling it.
+                          <div className="hidden sm:block text-rose-50/80 text-xs text-right">
+                            Your honesty shapes<br />the red side.
                           </div>
-                        </div>
-                        <div className="hidden sm:block text-rose-50/80 text-xs text-right">
-                          Your honesty shapes<br />the red side.
                         </div>
                       </div>
                     </button>
@@ -374,9 +456,11 @@ export default function HomePage() {
                         </span>
                       </div>
                       <div className="w-full h-3 rounded-full bg-slate-800 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 transition-all duration-500"
-                          style={{ width: `${goodPct}%` }}
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${goodPct}%` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          className="h-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400"
                         />
                       </div>
                       <div className="flex justify-between text-[10px] text-slate-500 mt-1">
@@ -396,7 +480,7 @@ export default function HomePage() {
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full border ${lastVote === "good"
                             ? "bg-emerald-900/50 border-emerald-300/60 text-emerald-100"
-                            : "bg-rose-900/50 border-rose-300/60 text-rose-100"
+                            : "bg-red-900/50 border-red-300/60 text-red-100"
                             }`}
                         >
                           <span className="hidden sm:inline">You picked {lastVote === "good" ? "Good" : "Bad"}</span>
@@ -412,9 +496,9 @@ export default function HomePage() {
                         setToastMsg(null);
                         setToastVoteType(null);
                       }}
-                      className="text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700 hover:border-cyan-400 transition-all shadow-sm active:scale-95"
+                      className="group text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-cyan-500 text-cyan-400 hover:text-white hover:bg-slate-700 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] transition-all shadow-[0_0_10px_rgba(34,211,238,0.2)] active:scale-95 animate-in fade-in zoom-in duration-300 animate-pulse"
                     >
-                      ↺ Change my vote
+                      <span className="inline-block group-hover:-rotate-180 transition-transform duration-500 animate-[spin_2s_linear_infinite]">↺</span> Change my vote
                     </button>
                   </div>
 
@@ -508,7 +592,7 @@ export default function HomePage() {
           <section className="w-full">
 
 
-            <ChoroplethMap stats={stats} />
+            <ChoroplethMap stats={stats} activeVote={activeVote} />
           </section>
         </main>
       </div>
