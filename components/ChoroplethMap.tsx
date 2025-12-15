@@ -361,8 +361,8 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
   return (
     <div
       ref={containerRef}
-      // DARK SKY THEME BACKGROUND
-      className="relative w-full max-w-6xl mx-auto rounded-2xl border border-sky-700/50 bg-sky-900 p-6 shadow-xl overflow-hidden"
+      // WHITE BRUTALIST THEME BACKGROUND
+      className="relative w-full max-w-6xl mx-auto rounded-[2rem] border-[4px] border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden"
       role="region"
       aria-label="Global Mood Map. Use Tab to navigate countries, Enter or Space to view details."
     >
@@ -542,7 +542,7 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
       <div aria-live="polite" className="sr-only">{liveText}</div>
 
       {/* Updated Legend */}
-      <div className="flex items-center justify-center gap-6 mt-4 text-xs font-medium text-sky-300">
+      <div className="flex items-center justify-center gap-6 mt-4 text-xs font-black uppercase tracking-wider text-black">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-500" />
           Good Vibes
