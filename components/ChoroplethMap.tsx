@@ -453,7 +453,7 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
                   geography={g}
                   fill={fill}
                   // Map borders
-                  stroke="#1e293b"
+                  stroke="#8687b2ff"
                   strokeWidth={0.5}
                   tabIndex={0}
                   role="button"
@@ -542,7 +542,7 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
       <div aria-live="polite" className="sr-only">{liveText}</div>
 
       {/* Updated Legend */}
-      <div className="flex items-center justify-center gap-6 mt-4 text-xs font-medium text-sky-300">
+      <div className="flex items-center justify-center gap-6 mt-4 text-xs font-medium text-sky-00">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-500" />
           Good Vibes
