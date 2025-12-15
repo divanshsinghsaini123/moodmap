@@ -287,30 +287,26 @@ type Tooltip = {
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-/** * NEW COLOR LOGIC: "Night Lights" Theme
- * Base: Dark Land (#1e293b)
- * Good: Glowing Gold/Yellow (City lights)
- * Bad: Glowing Red
- */
+/** * SATURATED STATIC LIGHT THEME COLORS */
 function colorForRatio(ratio: number) {
-  // If no data or neutral, return the base dark land color
-  if (ratio === 0) return "#1e293b";
+  // Neutral / No Data (Light Gray)
+  if (ratio === 0) return "#e2e8f0";
 
   if (ratio > 0) {
-    // GOOD MOOD -> GREEN/EMERALD LIGHTS
-    // Mapping 0..1 to intensity
-    if (ratio < 0.2) return "#064e3b"; // faint green
-    if (ratio < 0.5) return "#15803d"; // dim green
-    if (ratio < 0.8) return "#22c55e"; // bright green
-    return "#4ade80"; // blazing light green
+    // GOOD MOOD (Vibrant Green)
+    // 0..1 mapping
+    if (ratio < 0.2) return "#bbf7d0"; // green-200
+    if (ratio < 0.5) return "#4ade80"; // green-400
+    if (ratio < 0.8) return "#22c55e"; // green-500
+    return "#16a34a"; // green-600
   } else {
-    // BAD MOOD -> RED LIGHTS
-    // Mapping -1..0 to intensity
+    // BAD MOOD (Vibrant Red)
+    // -1..0 mapping
     const abs = Math.abs(ratio);
-    if (abs < 0.2) return "#450a0a"; // faint red
-    if (abs < 0.5) return "#991b1b"; // dim red
-    if (abs < 0.8) return "#dc2626"; // bright red
-    return "#f87171"; // blazing bright red
+    if (abs < 0.2) return "#fecdd3"; // rose-200
+    if (abs < 0.5) return "#fb7185"; // rose-400
+    if (abs < 0.8) return "#f43f5e"; // rose-500
+    return "#e11d48"; // rose-600
   }
 }
 
@@ -365,8 +361,8 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
   return (
     <div
       ref={containerRef}
-      // DARK OCEAN BACKGROUND
-      className="relative w-full max-w-6xl mx-auto rounded-2xl border border-slate-800 bg-[#020617] p-6 shadow-2xl overflow-hidden"
+      // DARK SKY THEME BACKGROUND
+      className="relative w-full max-w-6xl mx-auto rounded-2xl border border-sky-700/50 bg-sky-900 p-6 shadow-xl overflow-hidden"
       role="region"
       aria-label="Global Mood Map. Use Tab to navigate countries, Enter or Space to view details."
     >
@@ -387,7 +383,7 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
         return (
           <div
             style={{ position: "fixed", left, top, zIndex: 60 }}
-            className="pointer-events-none bg-black/90 border border-slate-700 text-sm text-slate-100 px-3 py-2 rounded-md shadow-[0_0_15px_rgba(255,255,255,0.1)] backdrop-blur-sm"
+            className="pointer-events-none bg-white/95 border border-slate-200 text-sm text-slate-700 px-3 py-2 rounded-md shadow-lg backdrop-blur-sm"
             role="tooltip"
             aria-live="assertive"
           >
@@ -433,8 +429,8 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
               const name = info?.name ?? geo.properties?.name ?? "Unknown";
               const stat = iso ? statsByIso[iso.toUpperCase()] : undefined;
 
-              // Default "Dark Land" fill
-              let fill = "#0f172a";
+              // Default "Light Land" fill
+              let fill = "#cbd5e1";
               let ratio = 0;
 
               if (stat) {
@@ -448,7 +444,7 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
               const isActive = activeVote && iso && activeVote.country === iso;
               if (isActive) {
                 // Flash effect color
-                fill = activeVote.mood === "good" ? "#ffffff" : "#ffffff"; // Flash white for impact
+                fill = activeVote.mood === "good" ? "#86efac" : "#fda4af"; // Flash light green/red
               }
 
               return (
@@ -456,8 +452,8 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
                   key={geo.rsmKey}
                   geography={g}
                   fill={fill}
-                  // Dark borders
-                  stroke="#1e293b"
+                  // Light borders
+                  stroke="#fff"
                   strokeWidth={0.5}
                   tabIndex={0}
                   role="button"
@@ -476,14 +472,14 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
                       zIndex: 100
                     } : { outline: "none", transition: "fill 0.5s ease" },
                     hover: {
-                      fill: "#ffffff",
-                      stroke: "#ffffff",
-                      strokeWidth: 1,
+                      fill: "#a855f7", // Purple-500
+                      stroke: "#9333ea", // Purple-600
+                      strokeWidth: 1.5,
                       outline: "none",
                       cursor: "pointer",
-                      filter: "drop-shadow(0 0 8px rgba(255,255,255,0.6))" // The light glow effect
+                      filter: "drop-shadow(0 0 6px rgba(168, 85, 247, 0.5))"
                     },
-                    pressed: { outline: "none", fill: "#94a3b8" },
+                    pressed: { outline: "none", fill: "#7e22ce" }, // Purple-700
                   }}
 
                   onFocus={(evt: React.FocusEvent<SVGPathElement>) => {
@@ -546,14 +542,14 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
       <div aria-live="polite" className="sr-only">{liveText}</div>
 
       {/* Updated Legend */}
-      <div className="flex items-center justify-center gap-6 mt-4 text-xs font-medium text-slate-400">
+      <div className="flex items-center justify-center gap-6 mt-4 text-xs font-medium text-sky-300">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#4ade80] shadow-[0_0_8px_#4ade80]" />
-          Good Vibes (Lights)
+          <span className="w-2 h-2 rounded-full bg-green-500" />
+          Good Vibes
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#f87171] shadow-[0_0_8px_#f87171]" />
-          Bad Vibes (Heat)
+          <span className="w-2 h-2 rounded-full bg-rose-500" />
+          Bad Vibes
         </div>
       </div>
     </div>

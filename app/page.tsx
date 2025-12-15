@@ -8,6 +8,7 @@ import ChoroplethMap from "@/components/ChoroplethMap";
 import { io, Socket } from "socket.io-client";
 import countryMap from "@/lib/countyname-code.json";
 import LiveVoteToast from '@/components/LiveVoteToast';
+import confetti from "canvas-confetti";
 
 const SERVER_URL = "https://moodmap-socket-server.onrender.com"
 const socket = io(SERVER_URL);
@@ -26,7 +27,7 @@ export default function HomePage() {
   const [reaction, setReaction] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [toastVoteType, setToastVoteType] = useState<"good" | "bad" | null>(null);
-  const [celebrating, setCelebrating] = useState(false);
+  // celebration state removed in favor of canvas-confetti
   const [activeVote, setActiveVote] = useState<{ country: string, mood: "good" | "bad" } | null>(null);
 
   // Refs for animations
@@ -36,7 +37,7 @@ export default function HomePage() {
   const blob3Ref = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Animation Initialization
+
   useEffect(() => {
     // 2. Background Blobs Floating Effect (Randomized)
     const animateBlob = (el: HTMLElement | null) => {
@@ -170,14 +171,31 @@ export default function HomePage() {
           console.log("country hi nhi milil");
         }
         if (mood === "good") {
-          // 1. Start Celebration
-          setCelebrating(true);
+          // Trigger Confetti Celebration for Good Votes
+          const duration = 3000;
+          const end = Date.now() + duration;
 
-          // 2. PAUSE HERE for 2 seconds
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          const frame = () => {
+            confetti({
+              particleCount: 2,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0 },
+              colors: ['#34d399', '#10b981', '#fbbf24'] // Emerald & Amber
+            });
+            confetti({
+              particleCount: 2,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1 },
+              colors: ['#34d399', '#10b981', '#fbbf24']
+            });
 
-          // 3. Stop Celebration
-          setCelebrating(false);
+            if (Date.now() < end) {
+              requestAnimationFrame(frame);
+            }
+          };
+          frame();
         }
         // Trigger map flash effect
         setActiveVote({ country: countryCode, mood });
@@ -219,48 +237,17 @@ export default function HomePage() {
   const badPct = grandTotal ? 100 - goodPct : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white overflow-x-hidden">
+    <div className="min-h-screen bg-sky-200 text-slate-900 overflow-x-hidden">
       <LiveVoteToast />
 
-      {/* Celebration Overlay */}
-      <AnimatePresence>
-        {celebrating && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none"
-          >
-            {/* Backdrop Blur */}
-            <div className="absolute inset-0 bg-emerald-500/10 backdrop-blur-[2px]" />
-
-            {/* Main Content */}
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 1.5, opacity: 0, y: -50 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="relative z-10 flex flex-col items-center text-center p-8"
-            >
-              <div className="text-8xl mb-2 filter drop-shadow-[0_0_40px_rgba(52,211,153,0.8)] animate-bounce">
-                🌟
-              </div>
-              <h2 className="text-5xl sm:text-7xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-green-100 to-teal-200 drop-shadow-[0_5px_5px_rgba(0,0,0,0.5)]">
-                GOOD VIBES
-                <br />
-                SENT!
-              </h2>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Celebration Overlay Removed */}
 
 
-      {/* subtle responsive glow blobs */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div ref={blob1Ref} className="absolute -top-32 -left-10 sm:left-10 h-48 sm:h-72 w-48 sm:w-72 rounded-full bg-cyan-500/25 blur-3xl" />
-        <div ref={blob2Ref} className="absolute top-20 sm:top-40 -right-20 sm:-right-10 h-56 sm:h-80 w-56 sm:w-80 rounded-full bg-fuchsia-500/20 blur-3xl" />
-        <div ref={blob3Ref} className="absolute bottom-0 left-1/4 sm:left-1/3 h-32 sm:h-48 w-56 sm:w-72 rounded-full bg-sky-500/10 blur-3xl" />
+      {/* subtle responsive glow blobs (Warm/Sunny Theme) */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden opacity-70">
+        <div ref={blob1Ref} className="absolute -top-32 -left-10 sm:left-10 h-48 sm:h-72 w-48 sm:w-72 rounded-full bg-orange-200/40 blur-3xl mix-blend-multiply" />
+        <div ref={blob2Ref} className="absolute top-20 sm:top-40 -right-20 sm:-right-10 h-56 sm:h-80 w-56 sm:w-80 rounded-full bg-amber-200/40 blur-3xl mix-blend-multiply" />
+        <div ref={blob3Ref} className="absolute bottom-0 left-1/4 sm:left-1/3 h-32 sm:h-48 w-56 sm:w-72 rounded-full bg-rose-200/40 blur-3xl mix-blend-multiply" />
       </div>
 
       {/* GLOBAL SPOTLIGHT (Orange/Amber) */}
@@ -278,20 +265,20 @@ export default function HomePage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/70 border border-cyan-400/40 text-[11px] text-cyan-100 mb-4"
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 text-[11px] text-slate-600 mb-4 shadow-sm"
           >
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             Live • MoodMap
           </motion.div>
           {/* Colorblind mode removed */}
-          <h1 className="text-2xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-2 text-center">
+          <h1 className="text-2xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-2 text-center text-slate-900">
             {["Read", "the", "mood", "of", "the", "planet"].map((word, i) => (
               <motion.span
                 key={i}
                 initial={{ opacity: 0, y: 20, filter: "blur(12px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 1.0, delay: 0.1 + i * 0.1, ease: "easeOut" }}
-                className={`inline-block mr-2 sm:mr-3 last:mr-0 ${word === "mood" ? "text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-emerald-400 to-cyan-300 animate-gradient-x" : ""}`}
+                className={`inline-block mr-2 sm:mr-3 last:mr-0 ${word === "mood" ? "text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 animate-gradient-x" : ""}`}
               >
                 {word}
               </motion.span>
@@ -301,7 +288,7 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.0, delay: 0.6 }}
-            className="hidden sm:block mt-3 text-slate-300 max-w-xl mx-auto text-sm sm:text-base"
+            className="hidden sm:block mt-3 text-slate-500 max-w-xl mx-auto text-sm sm:text-base"
           >
             Cast your vote and watch the world glow between good days and bad days.
             Every click shifts the colors.
@@ -318,8 +305,8 @@ export default function HomePage() {
 
             {loading && !toastMsg && (
               <div className="mx-auto max-w-2xl mb-4 flex justify-center">
-                <div className="flex items-center gap-3 px-3 py-2 rounded-md bg-white/6 border border-white/10 text-slate-100 text-sm shadow" role="status" aria-live="polite">
-                  <svg className="h-4 w-4 animate-spin text-cyan-300" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.2" /><path d="M22 12a10 10 0 0 0-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg>
+                <div className="flex items-center gap-3 px-3 py-2 rounded-md bg-white border border-slate-200 text-slate-600 text-sm shadow-sm" role="status" aria-live="polite">
+                  <svg className="h-4 w-4 animate-spin text-indigo-500" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.2" /><path d="M22 12a10 10 0 0 0-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg>
                   <div>Sending vote…</div>
                 </div>
               </div>
@@ -327,116 +314,185 @@ export default function HomePage() {
 
             <section
               onMouseMove={handleMouseMove}
-              className="group/card relative w-full bg-slate-900/80 border border-slate-700/80 rounded-3xl p-4 sm:p-5 lg:p-6 shadow-[0_0_60px_rgba(8,47,73,0.75)] backdrop-blur-sm overflow-hidden isolate"
+              className="group/card relative w-full bg-sky-800 border border-sky-700/50 rounded-3xl p-4 sm:p-5 lg:p-6 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.3)] overflow-hidden isolate"
             >
               {/* Spotlight for First Box */}
               <div className="absolute inset-0 -z-10 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700"
-                style={{ background: `radial-gradient(800px circle at var(--x) var(--y), rgba(248, 139, 56, 0.2), transparent 30%)` }}
+                style={{ background: `radial-gradient(800px circle at var(--x) var(--y), rgba(16, 185, 129, 0.05), transparent 40%)` }}
               />
 
               {!lastVote ? (
-                <div className="space-y-5 relative">
+                <div className="space-y-3 relative">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
-                        How&apos;s your day going?
-
+                      <h2 className="text-lg font-bold flex items-center gap-2 text-white">
+                        How&apos;s your day?
                       </h2>
-                      <p className="text-slate-400 text-xs sm:text-sm mt-1">
-                        Answer once, change it anytime.
+                      <p className="text-sky-200 text-xs mt-0.5">
+                        Answer once, change anytime.
                       </p>
                     </div>
                     {grandTotal > 0 && (
-                      <div className="hidden sm:flex flex-col items-end text-xs text-slate-400">
-                        <span>Global responses</span>
-                        <span className="font-semibold text-cyan-300 text-base">
+                      <div className="hidden sm:flex flex-col items-end text-xs text-sky-300">
+                        <span>Responses</span>
+                        <span className="font-semibold text-sky-50 text-sm">
                           {grandTotal.toLocaleString()}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* Buttons row */}
-                  <div className="flex flex-col gap-3">
+                  {/* Buttons row - Highly Visible Animated Gradient Cards */}
+                  <div className="flex flex-col gap-4">
+                    {/* GOOD VOTE BUTTON */}
                     <button
                       onClick={() => sendVote("good")}
                       onMouseMove={handleMouseMove}
                       disabled={loading}
-                      className="group relative rounded-2xl p-[3px] focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:opacity-70 overflow-hidden isolate"
+                      className="group relative w-full text-left transition-transform active:scale-[0.98]"
                     >
-                      {/* Running Border Spinner */}
-                      <div className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#6ee7b7_50%,#0000_100%)]" />
+                      {/* Animated Gradient Border Layer */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 opacity-70 blur-sm transition-all duration-500 group-hover:opacity-100 group-hover:blur-md animate-pulse" />
 
-                      {/* Inner Button Content */}
-                      <div className="relative h-full w-full rounded-2xl bg-slate-900 px-4 py-3.5 bg-gradient-to-br from-emerald-400/80 to-slate-900/90">
-                        {/* Fog Effect (Emerald Hover) */}
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
-                          style={{ background: `radial-gradient(circle at var(--x) var(--y), rgba(16, 185, 129, 0.6), transparent 70%)` }}
-                        />
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <div className="text-base sm:text-lg font-semibold flex items-center gap-2 text-slate-100">
-                              😊 Good day
-                              <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/10 border border-emerald-400/20 text-emerald-200">
-                                Positive
+                      {/* Main Card Content: CLEAN SINGLE BORDER */}
+                      <div className="relative rounded-2xl bg-sky-200 border border-slate-100 shadow-sm overflow-hidden h-20 sm:h-24 transition-all duration-300 group-hover:shadow-md">
+
+                        {/* 🌊 LIQUID LAYER (Background) */}
+                        <div className="absolute inset-x-0 bottom-0 top-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
+                          <div
+                            className="absolute bottom-0 w-full transition-all duration-700 ease-in-out"
+                            style={{ height: `${Math.max(30, goodPct)}%` }}
+                          >
+                            {/* Back Wave (More Visible) */}
+                            <motion.div
+                              animate={{ x: ["-50%", "0%"] }}
+                              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+                              className="absolute -top-3 left-0 w-[200%] h-6 bg-repeat-x bg-cover opacity-60 mix-blend-multiply"
+                              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%2310b981'/%3E%3C/svg%3E")` }}
+                            />
+
+                            {/* Front Wave (More Visible) */}
+                            <motion.div
+                              animate={{ x: ["-50%", "0%"] }}
+                              transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+                              className="absolute -top-4 left-0 w-[200%] h-6 bg-repeat-x bg-cover z-10 opacity-100"
+                              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%236ee7b7'/%3E%3C/svg%3E")` }}
+                            />
+
+                            {/* Liquid Body */}
+                            <div className="relative h-full w-full bg-emerald-400 opacity-90 z-0" />
+                          </div>
+                        </div>
+
+                        {/* LIGHT REFLECTION (Overlay) */}
+                        <div className="absolute inset-0 z-[5] bg-gradient-to-b from-white/60 to-transparent opacity-80 pointer-events-none rounded-2xl" />
+
+                        {/* Content Container (Foreground) */}
+                        <div className="relative z-10 h-full px-3 sm:px-4 flex items-center gap-3 sm:gap-4 ">
+                          {/* Compact Floating Icon */}
+                          <div
+                            className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 flex items-center justify-center text-xl sm:text-2xl bg-white/90 rounded-xl shadow-sm border border-emerald-100 text-emerald-600 backdrop-blur-sm"
+                          >
+                            😊
+                          </div>
+
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-800 text-base sm:text-lg group-hover:text-emerald-900 transition-colors drop-shadow-sm">
+                                Feeling Good
+                              </span>
+                              <span className="shrink-0 inline-flex items-center text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-emerald-900 bg-white/50 px-1.5 py-0.5 rounded-md backdrop-blur-md border border-white/20 shadow-sm">
+                                Thriving
                               </span>
                             </div>
-                            <div className="text-xs sm:text-sm text-slate-400 group-hover:text-emerald-100/80 transition-colors mt-1">
-                              Chill, productive or just quietly happy.
-                            </div>
-                          </div>
-                          <div className="hidden sm:block text-emerald-50/80 text-xs text-right">
-                            Tap to nudge the map<br />towards green.
+                            <p className="text-[10px] sm:text-xs text-slate-700 font-medium leading-snug mt-0.5 line-clamp-1 mix-blend-hard-light">
+                              Productive, happy, or at peace.
+                            </p>
                           </div>
                         </div>
                       </div>
                     </button>
 
+                    {/* BAD VOTE BUTTON */}
                     <button
                       onClick={() => sendVote("bad")}
                       onMouseMove={handleMouseMove}
                       disabled={loading}
-                      className="group relative rounded-2xl p-[3px] focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-70 overflow-hidden isolate"
+                      className="group relative w-full text-left transition-transform active:scale-[0.98]"
                     >
-                      {/* Running Border Spinner */}
-                      <div className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#dc2626_50%,#0000_100%)]" />
+                      {/* Animated Gradient Border Layer */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-rose-400 via-fuchsia-400 to-violet-400 opacity-70 blur-sm transition-all duration-500 group-hover:opacity-100 group-hover:blur-md animate-pulse" />
 
-                      {/* Inner Button Content */}
-                      <div className="relative h-full w-full rounded-2xl bg-slate-900 px-4 py-3.5 bg-gradient-to-br from-red-700/80 to-slate-900/90">
-                        {/* Fog Effect (Orange Hover) */}
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
-                          style={{ background: `radial-gradient(circle at var(--x) var(--y), rgba(249, 115, 22, 0.6), transparent 70%)` }}
-                        />
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <div className="text-base sm:text-lg font-semibold flex items-center gap-2 text-slate-100">
-                              😞 Bad day
-                              <span className="hidden sm:inline-block text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-200">
-                                It&apos;s okay
+                      {/* Main Card Content: CLEAN SINGLE BORDER */}
+                      <div className="relative rounded-2xl bg-sky-200 border border-slate-100 shadow-sm overflow-hidden h-20 sm:h-24 transition-all duration-300 group-hover:shadow-md">
+
+                        {/* 🌊 LIQUID LAYER (Background) */}
+                        <div className="absolute inset-x-0 bottom-0 top-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
+                          <div
+                            className="absolute bottom-0 w-full transition-all duration-700 ease-in-out"
+                            style={{ height: `${Math.max(30, badPct)}%` }}
+                          >
+                            {/* Back Wave (More Visible) */}
+                            <motion.div
+                              animate={{ x: ["-50%", "0%"] }}
+                              transition={{ repeat: Infinity, duration: 9, ease: "linear" }}
+                              className="absolute -top-3 left-0 w-[200%] h-6 bg-repeat-x bg-cover opacity-60 mix-blend-multiply"
+                              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23e11d48'/%3E%3C/svg%3E")` }}
+                            />
+
+                            {/* Front Wave (More Visible) */}
+                            <motion.div
+                              animate={{ x: ["-50%", "0%"] }}
+                              transition={{ repeat: Infinity, duration: 7, ease: "linear" }}
+                              className="absolute -top-4 left-0 w-[200%] h-6 bg-repeat-x bg-cover z-10 opacity-100"
+                              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3E%3Cpath d='M800 56.9c-155.5 0-204.9-50-405.5-49.9-200 0-250 49.9-394.5 49.9v31.8h800v-.2-31.6z' fill='%23fb7185'/%3E%3C/svg%3E")` }}
+                            />
+
+                            {/* Liquid Body */}
+                            <div className="relative h-full w-full bg-rose-400 opacity-90 z-0" />
+                          </div>
+                        </div>
+
+                        {/* LIGHT REFLECTION (Overlay) */}
+                        <div className="absolute inset-0 z-[5] bg-gradient-to-b from-white/60 to-transparent opacity-80 pointer-events-none rounded-2xl" />
+
+                        {/* Content Container (Foreground) */}
+                        <div className="relative z-10 h-full px-3 sm:px-4 flex items-center gap-3 sm:gap-4">
+                          {/* Compact Floating Icon */}
+                          <div
+                            className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 flex items-center justify-center text-xl sm:text-2xl bg-white/90 rounded-xl shadow-sm border border-rose-100 text-rose-600 backdrop-blur-sm"
+                          >
+                            😞
+                          </div>
+
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-800 text-base sm:text-lg group-hover:text-rose-900 transition-colors drop-shadow-sm">
+                                Having a Hard Time
+                              </span>
+                              <span className="shrink-0 inline-flex items-center text-[9px] sm:text-[10px] font-bold tracking-wider uppercase text-rose-900 bg-white/50 px-1.5 py-0.5 rounded-md backdrop-blur-md border border-white/20 shadow-sm">
+                                Human
                               </span>
                             </div>
-                            <div className="text-xs sm:text-sm text-slate-400 group-hover:text-rose-100/80 transition-colors mt-1">
-                              Overwhelmed, tired or just not feeling it.
-                            </div>
-                          </div>
-                          <div className="hidden sm:block text-rose-50/80 text-xs text-right">
-                            Your honesty shapes<br />the red side.
+                            <p className="text-[10px] sm:text-xs text-slate-700 font-medium leading-snug mt-0.5 line-clamp-1 mix-blend-hard-light">
+                              Anxious, tired, or need a reset.
+                            </p>
                           </div>
                         </div>
                       </div>
                     </button>
                   </div>
 
-                  {/* Global mood bar */}
+                  {/* Global mood bar (Pre-Vote) */}
                   {grandTotal > 0 && (
-                    <div className="mt-3 space-y-2">
-                      <div className="flex justify-between text-[11px] text-slate-300">
-                        <span>Live global mood balance</span>
-                        <span className="text-slate-400">
+                    <div className="mt-4 space-y-2 bg-sky-950/50 p-4 rounded-xl border border-sky-800/50">
+                      <div className="flex justify-between text-[11px] text-sky-300 font-medium uppercase tracking-wider">
+                        <span>Global Mood Balance</span>
+                        <span className="text-sky-400 normal-case tracking-normal">
                           Good {goodPct}% • Bad {badPct}%
                         </span>
                       </div>
-                      <div className="w-full h-3 rounded-full bg-slate-800 overflow-hidden">
+                      <div className="w-full h-3 rounded-full bg-sky-900/50 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${goodPct}%` }}
@@ -444,10 +500,7 @@ export default function HomePage() {
                           className="h-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400"
                         />
                       </div>
-                      <div className="flex justify-between text-[10px] text-slate-500 mt-1">
-                        <span>More red on the map = more rough days.</span>
-                        <span>More green = better vibes.</span>
-                      </div>
+
                     </div>
                   )}
                 </div>
@@ -456,18 +509,18 @@ export default function HomePage() {
                 <div className="space-y-5" ref={resultsRef}>
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                      <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2 text-white">
                         Thanks for sharing
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full border ${lastVote === "good"
-                            ? "bg-emerald-900/50 border-emerald-300/60 text-emerald-100"
-                            : "bg-red-900/50 border-red-300/60 text-red-100"
+                            ? "bg-emerald-900/30 border-emerald-500/30 text-emerald-300"
+                            : "bg-rose-900/30 border-rose-500/30 text-rose-300"
                             }`}
                         >
                           <span className="hidden sm:inline">You picked {lastVote === "good" ? "Good" : "Bad"}</span>
                         </span>
                       </h2>
-                      <p className="text-slate-400 text-xs sm:text-sm mt-1">
+                      <p className="text-sky-200 text-xs sm:text-sm mt-1">
                         Here&apos;s how your vote blends into the global mood.
                       </p>
                     </div>
@@ -477,9 +530,13 @@ export default function HomePage() {
                         setToastMsg(null);
                         setToastVoteType(null);
                       }}
-                      className="group text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-cyan-500 text-cyan-400 hover:text-white hover:bg-slate-700 hover:border-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] transition-all shadow-[0_0_10px_rgba(34,211,238,0.2)] active:scale-95 animate-in fade-in zoom-in duration-300 animate-pulse"
+                      className="group flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-sky-200 border border-sky-300 text-sky-900 hover:bg-sky-300 hover:border-sky-400 hover:shadow-sm transition-all"
                     >
-                      <span className="inline-block group-hover:-rotate-180 transition-transform duration-500 animate-[spin_2s_linear_infinite]">↺</span> Change my vote
+                      <svg className="w-3 h-3 group-hover:rotate-180 transition-transform duration-500 text-sky-700 group-hover:text-sky-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M4 12V4H12" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C9.25022 4 6.82447 5.40704 5.38451 7.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      Change vote
                     </button>
                   </div>
 
@@ -488,14 +545,14 @@ export default function HomePage() {
                       {/* Good bar */}
                       <div>
                         <div className="flex justify-between text-xs mb-1">
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 text-sky-100">
                             😊 <span className="font-medium">Good</span>
                           </span>
-                          <span className="text-slate-300">
+                          <span className="text-sky-300">
                             {good.toLocaleString()} • {goodPct}%
                           </span>
                         </div>
-                        <div className="w-full h-4 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="w-full h-4 bg-sky-950/50 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-700 ${lastVote === "good"
                               ? "bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400"
@@ -509,14 +566,14 @@ export default function HomePage() {
                       {/* Bad bar */}
                       <div>
                         <div className="flex justify-between text-xs mb-1">
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 text-sky-100">
                             😞 <span className="font-medium">Bad</span>
                           </span>
-                          <span className="text-slate-300">
+                          <span className="text-sky-300">
                             {bad.toLocaleString()} • {badPct}%
                           </span>
                         </div>
-                        <div className="w-full h-4 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="w-full h-4 bg-sky-950/50 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-700 ${lastVote === "bad"
                               ? "bg-gradient-to-r from-rose-400 via-fuchsia-400 to-violet-400"
@@ -540,26 +597,26 @@ export default function HomePage() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -20, scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                  className={`mt-4 w-full flex items-center justify-between px-5 py-4 rounded-xl border shadow-2xl backdrop-blur-xl ${toastVoteType === "good"
-                    ? "bg-emerald-900/90 border-emerald-500/40 shadow-emerald-900/20"
-                    : "bg-rose-900/90 border-rose-500/40 shadow-rose-900/20"
+                  className={`mt-4 w-full flex items-center justify-between px-5 py-4 rounded-xl border shadow-lg backdrop-blur-xl ${toastVoteType === "good"
+                    ? "bg-emerald-50 border-emerald-100 shadow-emerald-100/50"
+                    : "bg-rose-50 border-rose-100 shadow-rose-100/50"
                     }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-1.5 rounded-full ${toastVoteType === "good" ? "bg-emerald-400 text-slate-900" : "bg-rose-400 text-white"}`}>
+                    <div className={`p-1.5 rounded-full ${toastVoteType === "good" ? "bg-emerald-100 text-emerald-600" : "bg-rose-100 text-rose-600"}`}>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <span className={`text-sm font-semibold ${toastVoteType === "good" ? "text-emerald-100" : "text-rose-100"}`}>
+                    <span className={`text-sm font-semibold ${toastVoteType === "good" ? "text-emerald-800" : "text-rose-800"}`}>
                       {toastMsg}
                     </span>
                   </div>
                   <button
                     onClick={() => { setToastMsg(null); setToastVoteType(null); }}
                     className={`text-xs px-2 py-1 rounded transition-colors ${toastVoteType === "good"
-                      ? "text-emerald-200 hover:bg-emerald-500/20"
-                      : "text-rose-200 hover:bg-rose-500/20"
+                      ? "text-emerald-600 hover:bg-emerald-100"
+                      : "text-rose-600 hover:bg-rose-100"
                       }`}
                   >
                     Dismiss
@@ -576,7 +633,17 @@ export default function HomePage() {
             <ChoroplethMap stats={stats} activeVote={activeVote} />
           </section>
         </main>
-      </div>
+      </div >
+    </div >
+  );
+}
+
+
+function LinkText({ good, bad }: { good: number, bad: number }) {
+  return (
+    <div className='flex justify-between text-[10px] text-slate-500 mt-1'>
+      <span>More solid green = better days.</span>
+      <span>More solid red = tough days.</span>
     </div>
   );
 }
