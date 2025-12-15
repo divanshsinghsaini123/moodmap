@@ -452,8 +452,8 @@ export default function ChoroplethMap({ stats, activeVote }: { stats: Stat[], ac
                   key={geo.rsmKey}
                   geography={g}
                   fill={fill}
-                  // Light borders
-                  stroke="#fff"
+                  // Map borders
+                  stroke="#1e293b"
                   strokeWidth={0.5}
                   tabIndex={0}
                   role="button"
