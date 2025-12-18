@@ -215,6 +215,7 @@ export default function HomePage() {
         // 5. Emit the string via Socket.IO
         socket.emit("VoteMessage", toastString);
         SetCurrentCountryVotes();
+        setCountryName(coutryname);
 
         console.log("Emitting toast:", toastString);
       } else {
@@ -229,7 +230,7 @@ export default function HomePage() {
       setLoading(false);
     }
   }
-  const SetCurrentCountryVotes = () => {
+  const SetCurrentCountryVotes = async () => {
     let good = 0;
     let bad = 0;
     stats.forEach((s) => {
@@ -239,6 +240,7 @@ export default function HomePage() {
       }
     });
     setActiveCountryStats({ good, bad });
+
   }
   // Global Mouse Tracking for Spotlight
   useEffect(() => {
