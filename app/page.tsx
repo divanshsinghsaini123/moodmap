@@ -285,8 +285,8 @@ export default function HomePage() {
         {/* BLUE TICKER BANNER */}
         <div className="relative w-full bg-[#4F46E5] border-b-[4px] border-black py-4 overflow-hidden shadow-sm z-10">
           <div className="whitespace-nowrap font-black text-white text-xl md:text-2xl tracking-widest uppercase animate-marquee">
-            MOODMAP: THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • 1 person in {CountryName} had  a good day AND 10 people in {CountryName} had a bad day today  KEEP VOTING • TRACK THE VIBE •
-            MOODMAP: THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • KEEP VOTING • TRACK THE VIBE •
+            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • {activeCountryStats?.good} person in {CountryName} had  a good day AND {activeCountryStats?.bad} people in {CountryName} had a bad day today •
+            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • {activeCountryStats?.good} person in {CountryName} had  a good day AND {activeCountryStats?.bad} people in {CountryName} had a bad day today •
           </div>
         </div>
 
