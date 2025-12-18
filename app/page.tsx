@@ -9,6 +9,7 @@ import { io, Socket } from "socket.io-client";
 import countryMap from "@/lib/countyname-code.json";
 import LiveVoteToast from '@/components/LiveVoteToast';
 import confetti from "canvas-confetti";
+import { stat } from "fs";
 
 const SERVER_URL = "https://moodmap-socket-server.onrender.com"
 const socket = io(SERVER_URL);
@@ -21,6 +22,10 @@ type MoodDoc = {
 };
 
 export default function HomePage() {
+  interface moodStats {
+    good: number;
+    bad: number
+  }
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<MoodDoc[]>([]);
   const [lastVote, setLastVote] = useState<"good" | "bad" | null>(null);
@@ -29,6 +34,8 @@ export default function HomePage() {
   const [toastVoteType, setToastVoteType] = useState<"good" | "bad" | null>(null);
   // celebration state removed in favor of canvas-confetti
   const [activeVote, setActiveVote] = useState<{ country: string, mood: "good" | "bad" } | null>(null);
+  const [CountryName, setCountryName] = useState<string>("unknown");
+  const [activeCountryStats, setActiveCountryStats] = useState<moodStats>({ good: 0, bad: 0 });
 
   // Refs for animations
   const headerRef = useRef<HTMLElement>(null);
@@ -166,6 +173,7 @@ export default function HomePage() {
 
         if (coutryname) {
           console.log(coutryname, countryCode);
+          setCountryName(coutryname);
         }
         else {
           console.log("country hi nhi milil");
@@ -206,6 +214,7 @@ export default function HomePage() {
 
         // 5. Emit the string via Socket.IO
         socket.emit("VoteMessage", toastString);
+        SetCurrentCountryVotes();
 
         console.log("Emitting toast:", toastString);
       } else {
@@ -220,7 +229,17 @@ export default function HomePage() {
       setLoading(false);
     }
   }
-
+  const SetCurrentCountryVotes = () => {
+    let good = 0;
+    let bad = 0;
+    stats.forEach((s) => {
+      if (s.country === CountryName) {
+        good = s.good || 0;
+        bad = s.bad || 0;
+      }
+    });
+    setActiveCountryStats({ good, bad });
+  }
   // Global Mouse Tracking for Spotlight
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -241,7 +260,7 @@ export default function HomePage() {
       <LiveVoteToast />
 
       {/* MAIN DEVICE CONTAINER */}
-      <div className="w-full max-w-7xl bg-white rounded-[1rem] border-[5px] border-black shadow-2xl overflow-hidden relative min-h-[580px] flex flex-col">
+      <div className="w-full max-w-7xl bg-white rounded-[1rem] border-[5px] border-black shadow-2xl overflow-hidden relative min-h-[660px] flex flex-col">
 
         {/* TOP BAR (Pills)
         <div className="flex justify-between items-center p-6 border-b-[3px] border-black">
@@ -266,7 +285,7 @@ export default function HomePage() {
         {/* BLUE TICKER BANNER */}
         <div className="relative w-full bg-[#4F46E5] border-b-[4px] border-black py-4 overflow-hidden shadow-sm z-10">
           <div className="whitespace-nowrap font-black text-white text-xl md:text-2xl tracking-widest uppercase animate-marquee">
-            MOODMAP: THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • KEEP VOTING • TRACK THE VIBE •
+            MOODMAP: THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • 1 person in {CountryName} had  a good day AND 10 people in {CountryName} had a bad day today  KEEP VOTING • TRACK THE VIBE •
             MOODMAP: THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • KEEP VOTING • TRACK THE VIBE •
           </div>
         </div>
