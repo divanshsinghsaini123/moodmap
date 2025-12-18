@@ -26,6 +26,10 @@ export default function HomePage() {
     good: number;
     bad: number
   }
+  interface CurrentCountry {
+    CountryName: string;
+    CountryCode: string;
+  }
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<MoodDoc[]>([]);
   const [lastVote, setLastVote] = useState<"good" | "bad" | null>(null);
@@ -34,8 +38,8 @@ export default function HomePage() {
   const [toastVoteType, setToastVoteType] = useState<"good" | "bad" | null>(null);
   // celebration state removed in favor of canvas-confetti
   const [activeVote, setActiveVote] = useState<{ country: string, mood: "good" | "bad" } | null>(null);
-  const [CountryName, setCountryName] = useState<string>("unknown");
-  const [activeCountryStats, setActiveCountryStats] = useState<moodStats>({ good: 0, bad: 0 });
+  const [CurrentCountry, setCurrentCountry] = useState<CurrentCountry>({ CountryName: "unknown", CountryCode: "UN" });
+  const [activeCountryStats, setActiveCountryStats] = useState<moodStats>({ good: 1, bad: 1 });
 
   // Refs for animations
   const headerRef = useRef<HTMLElement>(null);
@@ -145,18 +149,23 @@ export default function HomePage() {
       { good: 0, bad: 0 }
     );
   }
+  useEffect(() => {
+    if (CurrentCountry.CountryCode === "UN") return;
+    const countryStat = stats.find(
+      (s) => s.country === CurrentCountry.CountryCode
+    );
+
+    setActiveCountryStats({
+      good: countryStat?.good ?? 0,
+      bad: countryStat?.bad ?? 0,
+    });
+  }, [CurrentCountry.CountryCode, stats]);
 
   async function sendVote(mood: "good" | "bad") {
     try {
       setLoading(true);
       setLastVote(mood);
       triggerReaction(mood);
-
-      // Trigger celebration for good votes
-      // if (mood === "good") {
-      //   setCelebrating(true);
-      //   setTimeout(() => setCelebrating(false), 2000);
-      // }
 
       const res = await fetch("/api/vote", {
         method: "POST",
@@ -168,12 +177,15 @@ export default function HomePage() {
       let countryCode = data.country.country;
       if (data.success && countryCode) {
         // Use the code directly or a friendly name if needed
-        const countryDisplay = countryCode === "UN" ? "an unknown location" : countryCode;
+        const countryDisplay = countryCode;
         const coutryname = (countryMap as Record<string, string>)[countryDisplay];
 
         if (coutryname) {
           console.log(coutryname, countryCode);
-          setCountryName(coutryname);
+          setCurrentCountry({
+            CountryName: coutryname,
+            CountryCode: countryDisplay,
+          });
         }
         else {
           console.log("country hi nhi milil");
@@ -214,10 +226,6 @@ export default function HomePage() {
 
         // 5. Emit the string via Socket.IO
         socket.emit("VoteMessage", toastString);
-        SetCurrentCountryVotes();
-        setCountryName(coutryname);
-
-        console.log("Emitting toast:", toastString);
       } else {
         console.error("API response missing success or country code:", data);
       }
@@ -230,18 +238,7 @@ export default function HomePage() {
       setLoading(false);
     }
   }
-  const SetCurrentCountryVotes = async () => {
-    let good = 0;
-    let bad = 0;
-    stats.forEach((s) => {
-      if (s.country === CountryName) {
-        good = s.good || 0;
-        bad = s.bad || 0;
-      }
-    });
-    setActiveCountryStats({ good, bad });
 
-  }
   // Global Mouse Tracking for Spotlight
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -264,31 +261,22 @@ export default function HomePage() {
       {/* MAIN DEVICE CONTAINER */}
       <div className="w-full max-w-7xl bg-white rounded-[1rem] border-[5px] border-black shadow-2xl overflow-hidden relative min-h-[660px] flex flex-col">
 
-        {/* TOP BAR (Pills)
-        <div className="flex justify-between items-center p-6 border-b-[3px] border-black">
-          <div className="flex items-center gap-2">
-            <button className="px-6 py-2 rounded-full border-[3px] border-black font-black text-sm bg-white hover:bg-zinc-100 uppercase tracking-wide flex items-center gap-2 transition-transform active:scale-95">
-              🔊 Sound
-            </button>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="w-10 h-10 rounded-full border-[3px] border-black flex items-center justify-center font-black bg-white hover:bg-zinc-100 transition-transform active:scale-95">
-              ✕
-            </button>
-            <button className="w-10 h-10 rounded-full border-[3px] border-black flex items-center justify-center font-black bg-white hover:bg-zinc-100 transition-transform active:scale-95">
-              ↗
-            </button>
-            <button className="px-6 py-2 rounded-full border-[3px] border-black font-black text-sm bg-white hover:bg-zinc-100 uppercase tracking-wide transition-transform active:scale-95">
-              Menu ≡
-            </button>
-          </div>
-        </div> */}
-
         {/* BLUE TICKER BANNER */}
         <div className="relative w-full bg-[#4F46E5] border-b-[4px] border-black py-4 overflow-hidden shadow-sm z-10">
           <div className="whitespace-nowrap font-black text-white text-xl md:text-2xl tracking-widest uppercase animate-marquee">
-            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • {CountryName !== "unknown" ? `${activeCountryStats?.good} person in ${CountryName} had a good day AND ${activeCountryStats?.bad} people in ${CountryName} had a bad day today` : ""} •
-            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • {CountryName !== "unknown" ? `${activeCountryStats?.good} person in ${CountryName} had a good day AND ${activeCountryStats?.bad} people in ${CountryName} had a bad day today` : ""} •
+            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS •{" "}
+            {CurrentCountry.CountryCode !== "UN"
+              ? `${activeCountryStats?.good} person in ${CurrentCountry.CountryName} had a good day AND ${activeCountryStats?.bad} had a bad day today`
+              : ""}
+            •
+
+            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS •{" "}
+            {CurrentCountry.CountryCode !== "UN"
+              ? `${activeCountryStats?.good} person in ${CurrentCountry.CountryName} had a good day AND ${activeCountryStats?.bad} had a bad day today`
+              : ""}
+            •
+
+
           </div>
         </div>
 
@@ -372,24 +360,26 @@ export default function HomePage() {
                       </button>
                     </div>
 
-                    {grandTotal > 0 && (
-                      <div className="mt-8 pt-6 border-t-[3px] border-black border-dashed">
-                        <div className="flex justify-between text-xs font-black uppercase tracking-wider mb-2">
-                          <span>Global Mood</span>
-                          <span>Good {goodPct}% • Bad {badPct}%</span>
+                    {
+                      grandTotal > 0 && (
+                        <div className="mt-8 pt-6 border-t-[3px] border-black border-dashed">
+                          <div className="flex justify-between text-xs font-black uppercase tracking-wider mb-2">
+                            <span>Global Mood</span>
+                            <span>Good {goodPct}% • Bad {badPct}%</span>
+                          </div>
+                          <div className="w-full h-6 rounded-full border-[3px] border-black bg-white overflow-hidden p-0.5">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${goodPct}%` }}
+                              transition={{ duration: 1.5, ease: "easeOut" }}
+                              className="h-full bg-[#4F46E5] rounded-full"
+                            />
+                          </div>
                         </div>
-                        <div className="w-full h-6 rounded-full border-[3px] border-black bg-white overflow-hidden p-0.5">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${goodPct}%` }}
-                            transition={{ duration: 1.5, ease: "easeOut" }}
-                            className="h-full bg-[#4F46E5] rounded-full"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                      )
+                    }
+                  </div >
+                </div >
               ) : (
                 <div className="bg-white border-[3px] border-black rounded-3xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center">
                   <h2 className="text-4xl font-black uppercase mb-4">You Voted!</h2>
@@ -406,11 +396,12 @@ export default function HomePage() {
                     Change Vote
                   </button>
                 </div>
-              )}
-            </div>
+              )
+              }
+            </div >
 
             {/* MAP COLUMN */}
-            <div className="relative">
+            < div className="relative" >
               <div className="bg-white border-[3px] border-black rounded-[2rem] p-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-[#f8f9fa]">
                 <div className="absolute -top-6 -right-6 hidden lg:block">
                   <div className="bg-[#4F46E5] text-white font-black px-4 py-2 border-[3px] border-black rounded-lg transform rotate-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
@@ -419,34 +410,36 @@ export default function HomePage() {
                 </div>
                 <ChoroplethMap stats={stats} activeVote={activeVote} />
               </div>
-            </div>
+            </div >
 
-          </main>
-        </div>
-      </div>
+          </main >
+        </div >
+      </div >
 
       {/* TOAST OVERLAY */}
       <AnimatePresence>
-        {toastMsg && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md"
-          >
-            <div className="bg-white border-[3px] border-black rounded-xl p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-lg border-[3px] border-black flex items-center justify-center text-xl ${toastVoteType === 'good' ? 'bg-emerald-400' : 'bg-rose-400'}`}>
-                {toastVoteType === 'good' ? '😊' : '😞'}
+        {
+          toastMsg && (
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.9 }}
+              className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md"
+            >
+              <div className="bg-white border-[3px] border-black rounded-xl p-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-lg border-[3px] border-black flex items-center justify-center text-xl ${toastVoteType === 'good' ? 'bg-emerald-400' : 'bg-rose-400'}`}>
+                  {toastVoteType === 'good' ? '😊' : '😞'}
+                </div>
+                <div className="flex-1 font-black uppercase text-sm leading-tight">
+                  {toastMsg}
+                </div>
               </div>
-              <div className="flex-1 font-black uppercase text-sm leading-tight">
-                {toastMsg}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )
+        }
+      </AnimatePresence >
 
-    </div>
+    </div >
   );
 }
 
