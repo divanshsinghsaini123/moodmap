@@ -255,6 +255,12 @@ export default function HomePage() {
   const goodPct = grandTotal ? Math.round((good / grandTotal) * 100) : 0;
   const badPct = grandTotal ? 100 - goodPct : 0;
 
+  // Determine marquee text suffix based on country
+  let marqueeSuffix = "";
+  if (CountryName !== "unknown") {
+    marqueeSuffix = `${activeCountryStats?.good} person in ${CountryName} had a good day AND ${activeCountryStats?.bad} people in ${CountryName} had a bad day today`;
+  }
+
   return (
     <div className="min-h-screen bg-[#8e9099] text-black font-sans p-1 sm:p-1 flex items-center justify-center font-bold">
       <LiveVoteToast />
@@ -285,8 +291,8 @@ export default function HomePage() {
         {/* BLUE TICKER BANNER */}
         <div className="relative w-full bg-[#4F46E5] border-b-[4px] border-black py-4 overflow-hidden shadow-sm z-10">
           <div className="whitespace-nowrap font-black text-white text-xl md:text-2xl tracking-widest uppercase animate-marquee">
-            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • {activeCountryStats?.good} person in {CountryName} had  a good day AND {activeCountryStats?.bad} people in {CountryName} had a bad day today •
-            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • {activeCountryStats?.good} person in {CountryName} had  a good day AND {activeCountryStats?.bad} people in {CountryName} had a bad day today •
+            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • {marqueeSuffix}
+            MOODMAP : THE WORLD HAS LOGGED {grandTotal.toLocaleString()} MOODS • {marqueeSuffix}
           </div>
         </div>
 
