@@ -237,13 +237,13 @@ export default function HomePage() {
   const badPct = grandTotal ? 100 - goodPct : 0;
 
   return (
-    <div className="min-h-screen bg-[#8e9099] text-black font-sans p-4 sm:p-8 flex items-center justify-center font-bold">
+    <div className="min-h-screen bg-[#8e9099] text-black font-sans p-1 sm:p-1 flex items-center justify-center font-bold">
       <LiveVoteToast />
 
       {/* MAIN DEVICE CONTAINER */}
-      <div className="w-full max-w-7xl bg-white rounded-[2.5rem] border-[5px] border-black shadow-2xl overflow-hidden relative min-h-[800px] flex flex-col">
+      <div className="w-full max-w-7xl bg-white rounded-[1rem] border-[5px] border-black shadow-2xl overflow-hidden relative min-h-[580px] flex flex-col">
 
-        {/* TOP BAR (Pills) */}
+        {/* TOP BAR (Pills)
         <div className="flex justify-between items-center p-6 border-b-[3px] border-black">
           <div className="flex items-center gap-2">
             <button className="px-6 py-2 rounded-full border-[3px] border-black font-black text-sm bg-white hover:bg-zinc-100 uppercase tracking-wide flex items-center gap-2 transition-transform active:scale-95">
@@ -261,7 +261,7 @@ export default function HomePage() {
               Menu ≡
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* BLUE TICKER BANNER */}
         <div className="relative w-full bg-[#4F46E5] border-b-[4px] border-black py-4 overflow-hidden shadow-sm z-10">
@@ -271,14 +271,14 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="flex-1 p-6 sm:p-10 flex flex-col items-center bg-white relative">
+        <div className="flex-1 p-6 sm:p-3 flex flex-col items-center bg-white relative">
 
           {/* GIANT TITLE */}
-          <div className="text-center mb-10 relative z-10">
-            <h1 className="text-7xl sm:text-9xl font-black tracking-tighter leading-[0.8] mb-2 uppercase drop-shadow-sm">
-              MOOD<br />MAP
+          <div className="text-center mb-2 relative z-10">
+            <h1 className="text-6xl sm:text-7xl font-black tracking-tighter leading-none mb-1 uppercase drop-shadow-sm whitespace-nowrap">
+              MOOD MAP
             </h1>
-            <p className="font-black uppercase tracking-[0.2em] text-sm sm:text-lg mt-4">
+            <p className="font-black uppercase tracking-[0.2em] text-sm sm:text-lg mt-1">
               Global Sentiment Tracker
             </p>
           </div>
@@ -309,7 +309,7 @@ export default function HomePage() {
                       <button
                         onClick={() => sendVote("good")}
                         disabled={loading}
-                        className="group relative w-full h-24 sm:h-28 rounded-2xl border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all overflow-hidden bg-white active:scale-[0.98]"
+                        className="group relative w-full h-20 sm:h-24 rounded-2xl border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all overflow-hidden bg-white active:scale-[0.98]"
                       >
                         {/* LIQUID INTERNALS PRESERVED */}
                         <div className="absolute inset-x-0 bottom-0 top-0 z-0 overflow-hidden pointer-events-none">
@@ -321,7 +321,7 @@ export default function HomePage() {
                         </div>
 
                         <div className="relative z-10 h-full flex items-center justify-between px-6">
-                          <span className="text-3xl sm:text-4xl font-black uppercase text-black bg-white/80 px-2 py-1 backdrop-blur-sm border-2 border-black rounded-lg transform -rotate-2">
+                          <span className="text-2xl sm:text-3xl font-black uppercase text-black bg-white/80 px-2 py-1 backdrop-blur-sm border-2 border-black rounded-lg transform -rotate-2">
                             FEELING GOOD
                           </span>
                           <span className="text-4xl transform group-hover:scale-125 transition-transform duration-300">😊</span>
@@ -332,7 +332,7 @@ export default function HomePage() {
                       <button
                         onClick={() => sendVote("bad")}
                         disabled={loading}
-                        className="group relative w-full h-24 sm:h-28 rounded-2xl border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all overflow-hidden bg-white active:scale-[0.98]"
+                        className="group relative w-full h-20 sm:h-24 rounded-2xl border-[3px] border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all overflow-hidden bg-white active:scale-[0.98]"
                       >
                         <div className="absolute inset-x-0 bottom-0 top-0 z-0 overflow-hidden pointer-events-none">
                           <div className="absolute bottom-0 w-full transition-all duration-700 ease-in-out" style={{ height: `${Math.max(30, badPct)}%` }}>
@@ -343,7 +343,7 @@ export default function HomePage() {
                         </div>
 
                         <div className="relative z-10 h-full flex items-center justify-between px-6">
-                          <span className="text-3xl sm:text-4xl font-black uppercase text-black bg-white/80 px-2 py-1 backdrop-blur-sm border-2 border-black rounded-lg transform rotate-1">
+                          <span className="text-2xl sm:text-3xl font-black uppercase text-black bg-white/80 px-2 py-1 backdrop-blur-sm border-2 border-black rounded-lg transform rotate-1">
                             HARD TIME
                           </span>
                           <span className="text-4xl transform group-hover:scale-125 transition-transform duration-300">😞</span>
