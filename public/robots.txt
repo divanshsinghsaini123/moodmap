@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://moodmap-eight.vercel.app/sitemap.xml
+Sitemap: https://moodmap-ui3.vercel.app/sitemap.xml

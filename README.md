@@ -16,6 +16,6 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Deployement link - https://moodmap-eight.vercel.app/
+Deployement link - https://moodmap-ui3.vercel.app/
 
 
